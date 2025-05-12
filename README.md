@@ -1,3 +1,4 @@
+# 赋权
 chmod +x ocserv_speed_manager.sh watch_vpns_limit.sh
 
 # 将 systemd 服务文件移动到正确位置
