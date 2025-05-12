@@ -41,15 +41,15 @@ function set_speed_limit() {
 }
 
 function clear_speed_limit() {
-    echo "🧹 正在清除限速规则..."
-    for IFACE in $(list_vpns_interfaces); do
-        echo "➤ 清除 $IFACE"
+    echo "🧹 正在清除 tc 限速规则（不会修改 iptables）..."
+    for IFACE in $(ip -o link show | awk -F': ' '{print $2}' | grep -E '^vpns[0-9]+$'); do
+        echo "➤ 清除 $IFACE 的 tc 限速"
         tc qdisc del dev $IFACE root 2>/dev/null
         tc qdisc del dev $IFACE ingress 2>/dev/null
     done
-    tc qdisc del dev $IFB_DEV root 2>/dev/null
-    ip link set dev $IFB_DEV down 2>/dev/null
-    echo "✅ 限速规则已清除。"
+    tc qdisc del dev ifb0 root 2>/dev/null
+    ip link set dev ifb0 down 2>/dev/null
+    echo "✅ 所有 tc 限速规则已清除，iptables 未变更。"
 }
 
 function show_status() {
