@@ -1,12 +1,80 @@
-# 赋权
+# ocserv VPN Bandwidth Limiter
+
+This tool includes:
+
+- `ocserv_speed_manager.sh`: Manual traffic control (set, clear, view)
+- `watch_vpns_limit.sh`: Automatically apply speed limits to all active vpns+ interfaces
+
+---
+
+## 🔧 Setup
+
+### 1. Grant execute permissions
+
+```bash
 chmod +x ocserv_speed_manager.sh watch_vpns_limit.sh
+```
 
-# 将 systemd 服务文件移动到正确位置
-mv vpns-limit.service /etc/systemd/system/
+### 2. Start with supervisord (recommended)
 
-# 启用并启动自动限速服务
-systemctl daemon-reexec
-systemctl enable --now vpns-limit.service
+Install supervisor:
 
-# （可选）立即限速所有当前连接
+```bash
+apt install -y supervisor
+```
+
+Create config file:
+
+```bash
+nano /etc/supervisor/conf.d/watch_vpns_limit.conf
+```
+
+Paste:
+
+```ini
+[program:watch_vpns_limit]
+command=/bin/bash /root/watch_vpns_limit.sh 50mbit
+autostart=true
+autorestart=true
+startsecs=3
+stderr_logfile=/var/log/vpns_limit.err.log
+stdout_logfile=/var/log/vpns_limit.out.log
+```
+
+Then reload:
+
+```bash
+supervisorctl reread
+supervisorctl update
+supervisorctl start watch_vpns_limit
+```
+
+---
+
+## ⚙ Manual Control (Optional)
+
+```bash
 ./ocserv_speed_manager.sh
+```
+
+Options:
+
+- Set global rate limit (e.g. 50mbit)
+- Clear all tc rules
+- View current tc status
+
+---
+
+## 📂 Files
+
+- `ocserv_speed_manager.sh` – Manual speed limit control
+- `watch_vpns_limit.sh` – Auto limit for new vpns+ interfaces
+- `watch_vpns_limit.conf` – Optional supervisord config (create manually)
+
+---
+
+## 📌 Notes
+
+- Reconnects are automatically re-limited
+- Works independently of user IP or session
+- Systemd not required
