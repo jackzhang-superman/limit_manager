@@ -78,3 +78,16 @@ Options:
 - Reconnects are automatically re-limited
 - Works independently of user IP or session
 - Systemd not required
+
+## 🧪 One-line full setup (with supervisor install)
+
+```bash
+apt install -y supervisor && \
+mkdir -p /etc/supervisor/conf.d/ && \
+wget -O /root/watch_vpns_limit.sh https://raw.githubusercontent.com/jackzhang-superman/limit_manager/main/watch_vpns_limit.sh && \
+wget -O /root/ocserv_speed_manager.sh https://raw.githubusercontent.com/jackzhang-superman/limit_manager/main/ocserv_speed_manager.sh && \
+chmod +x /root/watch_vpns_limit.sh /root/ocserv_speed_manager.sh && \
+echo -e "[program:watch_vpns_limit]\\ncommand=/bin/bash /root/watch_vpns_limit.sh 50mbit\\nautostart=true\\nautorestart=true\\nstartsecs=3\\nstderr_logfile=/var/log/vpns_limit.err.log\\nstdout_logfile=/var/log/vpns_limit.out.log" > /etc/supervisor/conf.d/watch_vpns_limit.conf && \
+supervisorctl reread && supervisorctl update && supervisorctl start watch_vpns_limit
+```
+
